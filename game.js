@@ -34,10 +34,10 @@ class Spaceship {
         this.x = 100;
         this.y = canvas.height / 2;
         this.velocity = 0;
-        this.gravity = 0.5;
-        this.jumpStrength = -8;
+        this.gravity = 0.2;
+        this.jumpStrength = -5;
         this.lastShot = 0;
-        this.shootInterval = 400;
+        this.shootInterval = 200;
         this.invincible = false;
     }
 
@@ -63,13 +63,6 @@ class Spaceship {
             this.y = canvas.height - this.height;
             this.velocity = 0;
         }
-
-        // Auto shoot
-        this.lastShot += deltaTime;
-        if (this.lastShot >= this.shootInterval) {
-            this.shoot();
-            this.lastShot = 0;
-        }
     }
 
     jump() {
@@ -77,7 +70,11 @@ class Spaceship {
     }
 
     shoot() {
-        bullets.push(new Bullet(this.x + this.width, this.y + this.height / 2, 1));
+        const now = Date.now();
+        if (now - this.lastShot >= this.shootInterval) {
+            bullets.push(new Bullet(this.x + this.width, this.y + this.height / 2, 1));
+            this.lastShot = now;
+        }
     }
 
     draw() {
@@ -589,6 +586,7 @@ function startGame() {
     
     // Create spaceship
     spaceship = new Spaceship();
+    spaceship.lastShot = Date.now();
     
     // Update UI
     document.getElementById('score').textContent = `Score: 0`;
@@ -614,9 +612,14 @@ document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('restartBtn').addEventListener('click', startGame);
 
 document.addEventListener('keydown', (e) => {
-    if (gameRunning && (e.code === 'Space' || e.code === 'ArrowUp')) {
-        e.preventDefault();
-        spaceship.jump();
+    if (gameRunning) {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+            e.preventDefault();
+            spaceship.jump();
+        } else if (e.code === 'Digit1' || e.code === 'Numpad1') {
+            e.preventDefault();
+            spaceship.shoot();
+        }
     }
 });
 
